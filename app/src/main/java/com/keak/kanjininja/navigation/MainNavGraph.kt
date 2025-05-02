@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.keak.base.screens.SplashScreen
 import com.keak.kanjininja.screens.home.HomeScreen
-import com.keak.kanjininja.screens.quiz.QuizScreen
+import com.keak.kanjininja.screens.kanjipreview.KanjiPreviewScreen
 
 @Composable
 fun MainNavGraph(
@@ -39,7 +39,7 @@ fun NavGraphBuilder.mainNavigation(
     composable<Screens.Home> {
         HomeScreen(router = router)
     }
-    composable<Screens.Quiz> {
-        QuizScreen(router = router)
+    composable<Screens.KanjiPreview> {
+        KanjiPreviewScreen(router = router)
     }
 }

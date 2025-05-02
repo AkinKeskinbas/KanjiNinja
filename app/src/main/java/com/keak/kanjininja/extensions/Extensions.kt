@@ -1,4 +1,4 @@
-package com.keak.base.extensions
+package com.keak.kanjininja.extensions
 
 import android.app.Activity
 import android.content.Context

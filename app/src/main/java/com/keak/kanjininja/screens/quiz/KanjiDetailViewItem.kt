@@ -12,7 +12,8 @@ data class KanjiDetailViewItem(
     val kanjiVideo: String,
     val kanjiImage: String,
     val examples: List<KanjiExample>,
-    val kanjiAnimationLast: String,
+    val kanjiAnimationLast: List<String>,
+    val hint: String
 )
 
 data class KanjiExample(

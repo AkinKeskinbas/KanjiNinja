@@ -1,4 +1,4 @@
-package com.keak.kanjininja.screens.quiz
+package com.keak.kanjininja.screens.kanjipreview
 
 import com.keak.kanjininja.network.ApiResult
 import com.keak.kanjininja.network.AppService
@@ -7,9 +7,9 @@ import com.keak.kanjininja.network.response.KanjiByGradeResponse
 import com.keak.kanjininja.network.response.KanjiDetailResponse
 import javax.inject.Inject
 
-class QuizScreenRepositoryImpl @Inject constructor (
+class KanjiPreviewScreenRepositoryImpl @Inject constructor (
     val appService: AppService
-): QuizScreenRepository {
+): KanjiPreviewScreenRepository {
     override suspend fun getKanjiByGrade(grade: String): ApiResult<KanjiByGradeResponse>  =
         handleApi{
             appService.getAllKanjiByGrade(grade)

@@ -1,6 +1,6 @@
 package com.keak.kanjininja.network.response
 
-import com.keak.base.extensions.EMPTY_STRING
+import com.keak.kanjininja.extensions.EMPTY_STRING
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
