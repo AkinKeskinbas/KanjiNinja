@@ -2,13 +2,18 @@ package com.keak.kanjininja.di
 
 import android.app.Application
 import android.content.Context
+import androidx.room.Room
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.keak.kanjininja.BuildConfig
 import com.keak.kanjininja.network.AppService
 import com.keak.kanjininja.network.NetworkInterceptor
 import com.keak.kanjininja.preference.DataStoreManager
-import com.keak.kanjininja.screens.quiz.QuizScreenRepository
-import com.keak.kanjininja.screens.quiz.QuizScreenRepositoryImpl
+import com.keak.kanjininja.preference.KanjiDao
+import com.keak.kanjininja.preference.KanjiDatabase
+import com.keak.kanjininja.preference.RoomRepository
+import com.keak.kanjininja.preference.RoomRepositoryImpl
+import com.keak.kanjininja.screens.kanjipreview.KanjiPreviewScreenRepository
+import com.keak.kanjininja.screens.kanjipreview.KanjiPreviewScreenRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,7 +37,7 @@ object AppModule {
     @Provides
     fun provideApplication(
         @ApplicationContext
-        app: Context
+        app: Context,
     ): Application {
         return app as Application
     }
@@ -41,7 +46,7 @@ object AppModule {
     @Singleton
     @Provides
     fun provideAppService(
-        @PpOkHttpClient ppOkHttpClient: OkHttpClient
+        @PpOkHttpClient ppOkHttpClient: OkHttpClient,
     ): AppService {
         val contentType = "application/json".toMediaType()
         val json = Json {
@@ -59,7 +64,7 @@ object AppModule {
     @Singleton
     @PpOkHttpClient
     fun provideOkHttpClient(
-        networkInterceptor: NetworkInterceptor
+        networkInterceptor: NetworkInterceptor,
     ): OkHttpClient {
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BASIC)
@@ -72,17 +77,32 @@ object AppModule {
         return client.build()
 
     }
+
     @Singleton
     @Provides
     fun provideDataStoreRepository(
-        @ApplicationContext app: Context
+        @ApplicationContext app: Context,
     ): DataStoreManager {
         return DataStoreManager(app)
     }
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): KanjiDatabase {
+        return Room.databaseBuilder(
+            context,
+            KanjiDatabase::class.java,
+            "kanji_db"
+        ).build()
+    }
+    @Provides
+    fun provideKanjiDao(db: KanjiDatabase): KanjiDao = db.kanjiDao()
+
+    @Provides
+    fun provideKanjiRepository(dao: KanjiDao): RoomRepository = RoomRepositoryImpl(dao)
 
     @Provides
     @Singleton
-    fun provideQuizRepository(quizScreenRepository: QuizScreenRepositoryImpl): QuizScreenRepository =
+    fun provideQuizRepository(quizScreenRepository: KanjiPreviewScreenRepositoryImpl): KanjiPreviewScreenRepository =
         quizScreenRepository
 }
 

@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.kotlinAndroidKsp)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.kotlin.serialization)
-
 }
 
 android {
@@ -53,6 +52,7 @@ android {
         compose = true
         buildConfig = true
     }
+
 }
 
 dependencies {
@@ -98,6 +98,7 @@ dependencies {
 
     //compose
     implementation(libs.compose.coil)
+    implementation(libs.compose.coil.svg)
     implementation(libs.material.icon)
     implementation(libs.androidx.core.splashscreen)
     implementation (libs.androidx.animation)
@@ -114,4 +115,9 @@ dependencies {
     //datastore
     implementation (libs.androidx.datastore.preferences)
     implementation (libs.androidx.datastore.preferences.core)
+
+    //media3
+    implementation (libs.android.media3.player)
+    implementation (libs.android.media3.player.ui)
+
 }

@@ -20,7 +20,7 @@ private val DarkColorScheme = darkColorScheme(
     onSecondary = DarkPastelGreen,
     tertiary = White,
     onTertiary = Black,
-    background = WhiteSmoke,
+    background = CyberPunkGreen,
     onBackground = GreyCloud,
     surface = LightGrey,
     surfaceContainer = ChromeYellow
@@ -33,7 +33,7 @@ private val LightColorScheme = lightColorScheme(
     onSecondary = DarkPastelGreen,
     tertiary = White,
     onTertiary = Black,
-    background = WhiteSmoke,
+    background = CyberPunkGreen,
     onBackground = GreyCloud,
     surface = LightGrey,
     surfaceContainer = ChromeYellow
@@ -53,7 +53,7 @@ private val LightColorScheme = lightColorScheme(
 fun KanjiNinjaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -63,7 +63,7 @@ fun KanjiNinjaTheme(
         }
 
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> DarkColorScheme
     }
 
     MaterialTheme(

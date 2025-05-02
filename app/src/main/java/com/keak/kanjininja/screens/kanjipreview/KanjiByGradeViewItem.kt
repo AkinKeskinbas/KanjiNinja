@@ -1,4 +1,4 @@
-package com.keak.kanjininja.screens.quiz
+package com.keak.kanjininja.screens.kanjipreview
 
 data class KanjiByGradeViewItem(
     val kanji: String,
