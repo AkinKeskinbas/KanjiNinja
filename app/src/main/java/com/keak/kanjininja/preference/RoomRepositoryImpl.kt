@@ -7,17 +7,17 @@ class RoomRepositoryImpl  @Inject constructor(
     private val dao: KanjiDao
 ) : RoomRepository {
 
-    override suspend fun insertKanjiList(list: List<KanjiByGradeViewItem>) {
+    override suspend fun insertKanjiList(list: List<KanjiByGradeViewItem>, grade: String) {
         val entities = list.mapIndexed { index, item ->
-            KanjiEntity(id = index, kanji = item.kanji, stroke = item.kanjiStroke)
+            KanjiEntity(id = index, kanji = item.kanji, stroke = item.kanjiStroke, grade = grade)
         }
         dao.insertAll(entities)
     }
 
-    override suspend fun getRandomKanji(previousKanji: String?): KanjiByGradeViewItem? {
+    override suspend fun getRandomKanji(previousKanji: String?, grade: String): KanjiByGradeViewItem? {
         val all = dao.getAll()
         val filtered = if (previousKanji != null) {
-            all?.filterNot { it.kanji == previousKanji }
+            all?.filterNot { it.kanji == previousKanji && it.grade == grade}
         } else all
 
         return filtered?.shuffled()?.firstOrNull()?.let {

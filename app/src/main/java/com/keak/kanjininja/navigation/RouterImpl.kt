@@ -20,8 +20,12 @@ class RouterImpl(
         navigate(Screens.Home)
     }
 
-    override fun goToQuizScreen() {
+    override fun goToKanjiPreviewScreen() {
         navigate(Screens.KanjiPreview)
+    }
+
+    override fun goToQuizScreen(kanji: String) {
+        navigate(Screens.Quiz(kanji = kanji))
     }
 
     private fun navigate(

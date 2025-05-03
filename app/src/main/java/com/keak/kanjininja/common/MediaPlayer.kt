@@ -15,18 +15,19 @@ import androidx.media3.ui.PlayerView
 @Composable
 fun Media3VideoPlayer(
     videoUrl: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-
-    // ExoPlayer'ı Compose ile uyumlu şekilde başlat
-    val exoPlayer = remember(context) {
+    val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(Uri.parse(videoUrl)))
             repeatMode = Player.REPEAT_MODE_ONE
-            prepare()
             playWhenReady = true
         }
+    }
+
+    LaunchedEffect(videoUrl) {
+        exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(videoUrl)))
+        exoPlayer.prepare()
     }
 
     DisposableEffect(Unit) {

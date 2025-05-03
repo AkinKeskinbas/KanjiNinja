@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class KanjiEntity(
     @PrimaryKey val id: Int,
     val kanji: String,
-    val stroke: String
+    val stroke: String,
+    val grade: String
 )

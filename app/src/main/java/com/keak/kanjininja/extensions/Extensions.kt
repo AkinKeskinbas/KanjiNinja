@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -18,9 +19,11 @@ fun Boolean?.orFalse(): Boolean {
 fun Int?.orZero(): Int {
     return this ?: 0
 }
+
 fun Double?.orZero(): Double {
     return this ?: 0.0
 }
+
 fun Context.createImageFile(): File {
     // Create an image file name
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
@@ -31,6 +34,30 @@ fun Context.createImageFile(): File {
         externalCacheDir      /* directory */
     )
     return image
+}
+
+fun String.takeBeforeParensAndRemoveSpaces(): String {
+    Timber.tag("Question").d("raw answer --> $this")
+
+    val normalized = this
+        .replace('（', '(')  // Japonca '(' -> ASCII '('
+        .replace('）', ')')  // Japonca ')' -> ASCII ')'
+
+    val question = normalized
+        .substringBefore("(")                 // Artık her şey ASCII parantez
+        .replace("\\s".toRegex(), "")         // Boşlukları sil
+
+    Timber.tag("Question").d("RealAnswer --> $question")
+    return question
+}
+
+fun String.extractKanaInParentheses(): String {
+    return this
+        .replace("（", "(")
+        .replace("）", ")")
+        .substringAfter("(", "")
+        .substringBefore(")", "")
+        .replace(" ", "")
 }
 
 fun Activity.openAppSettings() {
@@ -45,5 +72,6 @@ tailrec fun Context.findActivity(): Activity = when (this) {
     is ContextWrapper -> baseContext.findActivity()
     else -> throw IllegalStateException()
 }
+
 const val EMPTY_STRING = ""
 

@@ -1,10 +1,15 @@
 package com.keak.kanjininja.screens.kanjipreview
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,6 +49,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.keak.kanjininja.R
 import com.keak.kanjininja.common.BaseAsyncImageComponent
 import com.keak.kanjininja.common.Media3VideoPlayer
@@ -56,7 +65,7 @@ import kotlinx.coroutines.delay
 fun KanjiPreviewScreen(modifier: Modifier = Modifier, router: Router) {
     val quizScreenViewModel: KanjiPreviewScreenViewModel = hiltViewModel()
 
-    val quizScreenState by quizScreenViewModel.quizScreenState.collectAsStateWithLifecycle()
+    val kanjiPreviewScreenState by quizScreenViewModel.kanjiPreviewScreenState.collectAsStateWithLifecycle()
     var isClicked by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
         targetValue = if (isClicked) 120f else 0f,
@@ -69,7 +78,8 @@ fun KanjiPreviewScreen(modifier: Modifier = Modifier, router: Router) {
         label = "bounceAnim"
     )
     val interactionSource = remember { MutableInteractionSource() }
-    // Reset state after animation
+    var shouldAnimate by remember { mutableStateOf(false) }
+
     LaunchedEffect(isClicked) {
         if (isClicked) {
             delay(600) // animation duration
@@ -81,107 +91,140 @@ fun KanjiPreviewScreen(modifier: Modifier = Modifier, router: Router) {
         quizScreenViewModel.getAllKanjiAndDetailByGrade(grade = "1")
     }
 
-
-    quizScreenState.let { safeState ->
+    LaunchedEffect(kanjiPreviewScreenState) {
+        if (kanjiPreviewScreenState is KanjiPreviewScreenState.Success) {
+            shouldAnimate = true
+        } else if (kanjiPreviewScreenState is KanjiPreviewScreenState.Loading) {
+            shouldAnimate = false
+        }
+    }
+    kanjiPreviewScreenState.let { safeState ->
         when (safeState) {
-            is QuizScreenState.Success -> {
+            is KanjiPreviewScreenState.Success -> {
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background),
-
+                ) {
+                    AnimatedVisibility(
+                        visible = shouldAnimate,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 500)) + slideInVertically(
+                            initialOffsetY = { -40 }),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 300)) + slideOutVertically(
+                            targetOffsetY = { 40 })
                     ) {
-
-                    KanjiViewComponent(
-                        modifier = Modifier,
-                        kanjiImage = safeState.selectedKanjiDetail.kanjiImage,
-                        animImageOne = safeState.selectedKanjiDetail.kanjiAnimationLast.getOrNull(
-                            1
-                        )
-                            .orEmpty(),
-                        animImageTwo = safeState.selectedKanjiDetail.kanjiAnimationLast.getOrNull(
-                            0
-                        )
-                            .orEmpty(),
-                        onyomi = safeState.selectedKanjiDetail.onyomiJa + safeState.selectedKanjiDetail.onyomiEng,
-                        kunyomi = safeState.selectedKanjiDetail.kunyomiJa + safeState.selectedKanjiDetail.kunyomiEng,
-                        hint = safeState.selectedKanjiDetail.hint,
-                        engMeaning = safeState.selectedKanjiDetail.meaningEng,
-                        kanjiVideo = safeState.selectedKanjiDetail.kanjiVideo,
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            modifier = Modifier.width(300.dp),
-                            onClick = {
-
-                            },
-                            colors = ButtonColors(
-                                containerColor = CyberPunkYellow,
-                                contentColor = WhiteSmoke,
-                                disabledContainerColor = CyberPunkYellow.copy(alpha = 0.3f),
-                                disabledContentColor = WhiteSmoke
+                        KanjiViewComponent(
+                            modifier = Modifier,
+                            kanjiImage = safeState.selectedKanjiDetail.kanjiImage,
+                            animImageOne = safeState.selectedKanjiDetail.kanjiAnimationLast.getOrNull(
+                                1
                             )
-                        ) {
-                            Text(
-                                text = "Show Examples",
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier,
-                                textAlign = TextAlign.Center,
-                                color = Color.Black
+                                .orEmpty(),
+                            animImageTwo = safeState.selectedKanjiDetail.kanjiAnimationLast.getOrNull(
+                                0
                             )
-                        }
-                        Spacer(Modifier.weight(1f))
-                        Image(
-                            painter = painterResource(R.drawable.refresh),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clickable(
-                                    interactionSource = interactionSource,
-                                    indication = null
-                                ) {
-
-                                    isClicked = true
-                                    quizScreenViewModel.getAllKanjiAndDetailByGrade(grade = "1")
-                                }
-                                .graphicsLayer {
-                                    rotationZ = rotation
-                                    scaleX = bounceScale
-                                    scaleY = bounceScale
-                                }
+                                .orEmpty(),
+                            onyomi = safeState.selectedKanjiDetail.onyomiJa,
+                            onyomiEng = safeState.selectedKanjiDetail.onyomiEng,
+                            kunyomi = safeState.selectedKanjiDetail.kunyomiJa,
+                            kunyomiEng = safeState.selectedKanjiDetail.kunyomiEng,
+                            hint = safeState.selectedKanjiDetail.hint,
+                            engMeaning = safeState.selectedKanjiDetail.meaningEng,
+                            kanjiVideo = safeState.selectedKanjiDetail.kanjiVideo,
                         )
                     }
+
+                    Spacer(Modifier.weight(1f))
+                    AnimatedVisibility(
+                        visible = shouldAnimate,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 500)),
+                        exit = fadeOut(animationSpec = tween(durationMillis = 300))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                modifier = Modifier.width(300.dp),
+                                onClick = {
+                                    router.goToQuizScreen(quizScreenViewModel.selectedKanji.value.orEmpty())
+                                },
+                                colors = ButtonColors(
+                                    containerColor = CyberPunkYellow,
+                                    contentColor = WhiteSmoke,
+                                    disabledContainerColor = CyberPunkYellow.copy(alpha = 0.3f),
+                                    disabledContentColor = WhiteSmoke
+                                )
+                            ) {
+                                Text(
+                                    text = "Show Examples",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier,
+                                    textAlign = TextAlign.Center,
+                                    color = Color.Black
+                                )
+                            }
+                            Spacer(Modifier.weight(1f))
+                            Image(
+                                painter = painterResource(R.drawable.refresh),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .clickable(
+                                        interactionSource = interactionSource,
+                                        indication = null
+                                    ) {
+
+                                        isClicked = true
+                                        quizScreenViewModel.getAllKanjiAndDetailByGrade(grade = "1")
+                                    }
+                                    .graphicsLayer {
+                                        rotationZ = rotation
+                                        scaleX = bounceScale
+                                        scaleY = bounceScale
+                                    }
+                            )
+                        }
+                    }
+
                     Spacer(Modifier.height(16.dp))
                 }
 
             }
 
-            is QuizScreenState.Error -> {
+            is KanjiPreviewScreenState.Error -> {
                 Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         style = MaterialTheme.typography.bodyLarge,
-                        text = "${(quizScreenState as QuizScreenState.Error).message}"
+                        text = "${(kanjiPreviewScreenState as KanjiPreviewScreenState.Error).message}"
                     )
                 }
             }
 
-            is QuizScreenState.Exception -> {
+            is KanjiPreviewScreenState.Exception -> {
                 Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         style = MaterialTheme.typography.bodyLarge,
-                        text = "${(quizScreenState as QuizScreenState.Exception).throwable.message}"
+                        text = "${(kanjiPreviewScreenState as KanjiPreviewScreenState.Exception).throwable.message}"
                     )
                 }
             }
 
-            QuizScreenState.Initial -> {}
-            QuizScreenState.Loading -> {}
+            KanjiPreviewScreenState.Initial -> {}
+            KanjiPreviewScreenState.Loading -> {
+                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
+                val progress by animateLottieCompositionAsState(composition)
+                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.size(500.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -194,7 +237,9 @@ private fun KanjiViewComponent(
     animImageOne: String,
     animImageTwo: String,
     onyomi: String,
+    onyomiEng: String,
     kunyomi: String,
+    kunyomiEng: String,
     hint: String,
     engMeaning: String,
     kanjiVideo: String,
@@ -242,9 +287,21 @@ private fun KanjiViewComponent(
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Black
         )
-
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "onyomi-eng: $onyomiEng",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Black
+        )
+        Spacer(Modifier.height(8.dp))
         Text(
             text = "kunyomi: $kunyomi",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Black
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "kunyomi-eng: $kunyomiEng",
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Black
         )
@@ -278,5 +335,7 @@ private fun KanjiViewComponentPreview() {
         hint = "Sound of the temple bell, when the sun 日 stands 立 on the horizon.",
         engMeaning = "tes",
         kanjiVideo = "test",
+        kunyomiEng = "test",
+        onyomiEng = "test"
     )
 }

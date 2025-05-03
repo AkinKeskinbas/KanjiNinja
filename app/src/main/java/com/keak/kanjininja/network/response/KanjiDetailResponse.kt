@@ -104,7 +104,7 @@ data class KanjiDetail(
     @SerialName ("kunyomi")
     val kunyomi: Kunyomi?,
     @SerialName ("video")
-    val kanjiVideo: KanjiVideo?
+    val kanjiVideo: KanjiVideo?,
 )
 
 @Serializable

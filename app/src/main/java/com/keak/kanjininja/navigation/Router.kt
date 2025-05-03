@@ -3,5 +3,6 @@ package com.keak.kanjininja.navigation
 interface Router {
     fun goToSplashToHomeScreen()
     fun goToHomeScreen()
-    fun goToQuizScreen()
+    fun goToKanjiPreviewScreen()
+    fun goToQuizScreen(kanji: String)
 }

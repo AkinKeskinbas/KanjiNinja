@@ -10,6 +10,11 @@ sealed class Screens {
     data object Home : Screens()
     @Serializable
     data object KanjiPreview : Screens()
+
+    @Serializable
+    data class Quiz(
+        val kanji: String
+    ) : Screens()
     @Serializable
     data object Favorite : Screens()
 

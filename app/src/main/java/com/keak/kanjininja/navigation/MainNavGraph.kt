@@ -6,9 +6,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.keak.base.screens.SplashScreen
 import com.keak.kanjininja.screens.home.HomeScreen
 import com.keak.kanjininja.screens.kanjipreview.KanjiPreviewScreen
+import com.keak.kanjininja.screens.quiz.QuizScreen
 
 @Composable
 fun MainNavGraph(
@@ -41,5 +43,9 @@ fun NavGraphBuilder.mainNavigation(
     }
     composable<Screens.KanjiPreview> {
         KanjiPreviewScreen(router = router)
+    }
+    composable<Screens.Quiz> {
+        val args = it.toRoute<Screens.Quiz>()
+        QuizScreen(router = router, kanji = args.kanji)
     }
 }

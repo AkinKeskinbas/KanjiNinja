@@ -14,6 +14,8 @@ import com.keak.kanjininja.preference.RoomRepository
 import com.keak.kanjininja.preference.RoomRepositoryImpl
 import com.keak.kanjininja.screens.kanjipreview.KanjiPreviewScreenRepository
 import com.keak.kanjininja.screens.kanjipreview.KanjiPreviewScreenRepositoryImpl
+import com.keak.kanjininja.screens.quiz.QuizScreenRepository
+import com.keak.kanjininja.screens.quiz.QuizScreenRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -102,7 +104,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideQuizRepository(quizScreenRepository: KanjiPreviewScreenRepositoryImpl): KanjiPreviewScreenRepository =
+    fun provideKanjiPreviewRepository(quizScreenRepository: KanjiPreviewScreenRepositoryImpl): KanjiPreviewScreenRepository =
+        quizScreenRepository
+    @Provides
+    @Singleton
+    fun provideQuizRepository(quizScreenRepository: QuizScreenRepositoryImpl): QuizScreenRepository =
         quizScreenRepository
 }
 

@@ -7,7 +7,6 @@ import com.keak.kanjininja.network.onError
 import com.keak.kanjininja.network.onException
 import com.keak.kanjininja.network.onSuccess
 import com.keak.kanjininja.preference.GetRandomKanjiUseCase
-import com.keak.kanjininja.screens.quiz.KanjiDetailUseCase
 import com.keak.kanjininja.screens.quiz.KanjiDetailViewItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,12 +19,13 @@ import javax.inject.Inject
 @HiltViewModel
 class KanjiPreviewScreenViewModel @Inject constructor(
     private val kanjiPreviewScreenUseCase: KanjiPreviewScreenUseCase,
-    private val getRandomKanjiUseCase: GetRandomKanjiUseCase
+    private val getRandomKanjiUseCase: GetRandomKanjiUseCase,
 
-) : ViewModel() {
+    ) : ViewModel() {
 
-    private val _quizScreenState = MutableStateFlow<QuizScreenState>(QuizScreenState.Initial)
-    val quizScreenState: StateFlow<QuizScreenState> = _quizScreenState
+    private val _kanjiPreviewScreenState =
+        MutableStateFlow<KanjiPreviewScreenState>(KanjiPreviewScreenState.Initial)
+    val kanjiPreviewScreenState: StateFlow<KanjiPreviewScreenState> = _kanjiPreviewScreenState
 
 
     private val _selectedKanji = MutableStateFlow<String?>(null)
@@ -33,15 +33,22 @@ class KanjiPreviewScreenViewModel @Inject constructor(
 
     fun getAllKanjiAndDetailByGrade(grade: String) {
         viewModelScope.launch {
-
-
+            _kanjiPreviewScreenState.emit(KanjiPreviewScreenState.Loading)
             kanjiPreviewScreenUseCase.getAllKanjiByGrade(grade)
                 .onSuccess { kanjiList ->
-                    getRandomKanjiUseCase.insertKanjiList(kanjiList)
-                    val selected = getRandomKanjiUseCase.getRandomKanji(_selectedKanji.value)?.kanji
+                    getRandomKanjiUseCase.insertKanjiList(kanjiList, grade = grade)
+                    val selected = getRandomKanjiUseCase.getRandomKanji(
+                        _selectedKanji.value,
+                        grade = grade
+                    )?.kanji
                     Timber.tag("RoomUseCase").d("Selected Kanji --> $selected")
                     if (selected == null) {
-                        _quizScreenState.emit(QuizScreenState.Error(0, "No kanji found"))
+                        _kanjiPreviewScreenState.emit(
+                            KanjiPreviewScreenState.Error(
+                                0,
+                                "No kanji found"
+                            )
+                        )
                         return@onSuccess
                     }
 
@@ -49,54 +56,50 @@ class KanjiPreviewScreenViewModel @Inject constructor(
 
                     kanjiPreviewScreenUseCase.getKanjiDetail(selected)
                         .onSuccess { detail ->
-                            _quizScreenState.emit(
-                                QuizScreenState.Success(
+                            _kanjiPreviewScreenState.emit(
+                                KanjiPreviewScreenState.Success(
                                     kanjiList = kanjiList,
                                     selectedKanjiDetail = detail
                                 )
                             )
                         }
                         .onError { code, message ->
-                            _quizScreenState.emit(
-                                QuizScreenState.Error(code, "Detail error: $message")
+                            _kanjiPreviewScreenState.emit(
+                                KanjiPreviewScreenState.Error(code, "Detail error: $message")
                             )
                         }
                         .onException { e ->
-                            _quizScreenState.emit(
-                                QuizScreenState.Exception(e)
+                            _kanjiPreviewScreenState.emit(
+                                KanjiPreviewScreenState.Exception(e)
                             )
                         }
                 }
                 .onError { code, message ->
-                    _quizScreenState.emit(QuizScreenState.Error(code, message))
+                    _kanjiPreviewScreenState.emit(KanjiPreviewScreenState.Error(code, message))
                 }
                 .onException { e ->
-                    _quizScreenState.emit(QuizScreenState.Exception(e))
+                    _kanjiPreviewScreenState.emit(KanjiPreviewScreenState.Exception(e))
                 }
         }
     }
 
 }
 
-sealed class KanjiScreenState {
-    object ShowDetail : KanjiScreenState()
-    object ShowQuiz : KanjiScreenState()
-}
 
-sealed class QuizScreenState {
-    data object Loading : QuizScreenState()
-    data object Initial : QuizScreenState()
+sealed class KanjiPreviewScreenState {
+    data object Loading : KanjiPreviewScreenState()
+    data object Initial : KanjiPreviewScreenState()
     class Success(
         val kanjiList: List<KanjiByGradeViewItem>,
         val selectedKanjiDetail: KanjiDetailViewItem,
-    ) : QuizScreenState()
+    ) : KanjiPreviewScreenState()
 
     class Error(
         val code: Int = 0,
         val message: String? = EMPTY_STRING,
-    ) : QuizScreenState()
+    ) : KanjiPreviewScreenState()
 
     class Exception(
         val throwable: Throwable,
-    ) : QuizScreenState()
+    ) : KanjiPreviewScreenState()
 }

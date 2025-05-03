@@ -13,7 +13,8 @@ data class KanjiDetailViewItem(
     val kanjiImage: String,
     val examples: List<KanjiExample>,
     val kanjiAnimationLast: List<String>,
-    val hint: String
+    val hint: String,
+    val questionAndAnswers: List<QuestionAndAnswer>? = null
 )
 
 data class KanjiExample(
@@ -28,4 +29,11 @@ data class Meaning(
 
 data class Audio(
     val mp3: String,
+)
+data class KanjiQuestions(
+    val kanjiQuestionList: List<QuestionAndAnswer>
+)
+data class QuestionAndAnswer(
+    val question: String,
+    val answer: String
 )

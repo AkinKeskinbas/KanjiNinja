@@ -17,7 +17,7 @@ fun HomeScreen(modifier: Modifier = Modifier, router: Router) {
             style = MaterialTheme.typography.bodyLarge,
             text = "Home Screen",
             modifier = Modifier.clickable{
-                router.goToQuizScreen()
+                router.goToKanjiPreviewScreen()
             }
         )
     }
